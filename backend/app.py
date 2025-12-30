@@ -9,14 +9,9 @@ from pymongo.errors import ServerSelectionTimeoutError
 from dotenv import load_dotenv
 import bcrypt
 import os
-
-# ------------------ LOAD ENV ------------------
 load_dotenv()
 
-# ------------------ APP ------------------
 app = FastAPI(title="Student Management API")
-
-# ------------------ CORS ------------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],   # OK for dev
@@ -25,7 +20,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ------------------ SECURITY ------------------
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 security = HTTPBearer(auto_error=True)
@@ -33,7 +27,6 @@ security = HTTPBearer(auto_error=True)
 if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY is not set")
 
-# ------------------ MONGODB ------------------
 MONGO_URL = os.getenv("MONGO_URL")
 
 if not MONGO_URL:
@@ -50,7 +43,6 @@ db = client["backend"]
 users = db["users"]
 students = db["students"]
 
-# ------------------ MODELS ------------------
 class UserSignup(BaseModel):
     name: str
     email: str
@@ -71,7 +63,6 @@ class Student(BaseModel):
     gender: str
 
 
-# ------------------ JWT UTILS ------------------
 def create_token(data: dict, expires_minutes: int = 60):
     payload = data.copy()
     payload["exp"] = datetime.utcnow() + timedelta(minutes=expires_minutes)
@@ -93,7 +84,6 @@ def verify_token(
             detail="Invalid or expired token",
         )
 
-# ------------------ ROUTES ------------------
 @app.get("/")
 def root():
     return {"message": "FastAPI backend is running!"}
