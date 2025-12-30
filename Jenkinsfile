@@ -1,23 +1,32 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "shakthi14/student-backend"
+    }
+
     stages {
-        stage('Checkout Code') {
+        stage('Git Pull') {
             steps {
-                checkout scm
+                git branch: 'main',
+                    credentialsId: 'github-creds',
+                    url: 'https://github.com/shakthii1407/student-app.git'
             }
         }
 
-        stage('Build Docker Images') {
+        stage('Docker Build') {
             steps {
-                sh 'docker-compose build'
+                sh 'docker build -t $DOCKER_IMAGE:latest backend'
             }
         }
 
-        stage('Deploy Containers') {
+        stage('Docker Push') {
             steps {
-                sh 'docker-compose up -d'
+                withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
+                    sh 'docker push $DOCKER_IMAGE:latest'
+                }
             }
         }
     }
 }
+
