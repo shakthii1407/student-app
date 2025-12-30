@@ -6,6 +6,13 @@ pipeline {
     }
 
     stages {
+
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
         stage('Git Pull') {
             steps {
                 git branch: 'main',
@@ -16,7 +23,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t ${DOCKER_IMAGE}:latest backend'
+                sh 'docker build -t $DOCKER_IMAGE:latest backend'
             }
         }
 
@@ -26,10 +33,9 @@ pipeline {
                     credentialsId: 'dockerhub-creds',
                     url: 'https://index.docker.io/v1/'
                 ) {
-                    sh 'docker push ${DOCKER_IMAGE}:latest'
+                    sh 'docker push $DOCKER_IMAGE:latest'
                 }
             }
         }
     }
 }
-
