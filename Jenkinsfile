@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "shakthi14/student-backend"
+        BACKEND_IMAGE  = "shakthi14/student-backend"
+        FRONTEND_IMAGE = "shakthi14/student-frontend"
     }
 
     stages {
@@ -21,16 +22,17 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+
+        stage('Build Backend Image') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE:latest backend'
+                sh 'docker build -t $BACKEND_IMAGE:latest backend'
             }
         }
 
-        stage('Docker Push') {
+        stage('Push Backend Image') {
             steps {
                 withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
-                    sh 'docker push $DOCKER_IMAGE:latest'
+                    sh 'docker push $BACKEND_IMAGE:latest'
                 }
             }
         }
@@ -48,6 +50,34 @@ pipeline {
                         shakthi14/student-backend:latest
                     '''
                 }
+            }
+        }
+
+
+        stage('Build Frontend Image') {
+            steps {
+                sh 'docker build -t $FRONTEND_IMAGE:latest frontend'
+            }
+        }
+
+        stage('Push Frontend Image') {
+            steps {
+                withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
+                    sh 'docker push $FRONTEND_IMAGE:latest'
+                }
+            }
+        }
+
+        stage('Deploy Frontend') {
+            steps {
+                sh '''
+                  docker rm -f student-frontend || true
+                  docker run -d \
+                    -p 3000:80 \
+                    --restart unless-stopped \
+                    --name student-frontend \
+                    shakthi14/student-frontend:latest
+                '''
             }
         }
     }
