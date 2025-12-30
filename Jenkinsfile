@@ -16,14 +16,17 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE:latest backend'
+                sh 'docker build -t ${DOCKER_IMAGE}:latest backend'
             }
         }
 
         stage('Docker Push') {
             steps {
-                withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
-                    sh 'docker push $DOCKER_IMAGE:latest'
+                withDockerRegistry(
+                    credentialsId: 'dockerhub-creds',
+                    url: 'https://index.docker.io/v1/'
+                ) {
+                    sh 'docker push ${DOCKER_IMAGE}:latest'
                 }
             }
         }
