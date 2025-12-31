@@ -14,7 +14,7 @@ pipeline {
             }
         }
 
-        stage('Git Pull') {
+        stage('Checkout Code') {
             steps {
                 git branch: 'main',
                     credentialsId: 'github-creds',
@@ -22,48 +22,52 @@ pipeline {
             }
         }
 
-
         stage('Build Backend Image') {
             steps {
-                sh 'docker build -t $BACKEND_IMAGE:latest backend'
+                sh '''
+                  docker build -t $BACKEND_IMAGE:$BUILD_NUMBER backend
+                '''
             }
         }
 
         stage('Push Backend Image') {
             steps {
                 withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
-                    sh 'docker push $BACKEND_IMAGE:latest'
+                    sh 'docker push $BACKEND_IMAGE:$BUILD_NUMBER'
                 }
             }
         }
 
         stage('Deploy Backend') {
             steps {
-                withCredentials([string(credentialsId: 'backend-secret-key', variable: 'SECRET_KEY')]) {
+                withCredentials([
+                    string(credentialsId: 'mongo-url', variable: 'MONGO_URL')
+                ]) {
                     sh '''
                       docker rm -f student-backend || true
                       docker run -d \
                         -p 8000:8000 \
                         --restart unless-stopped \
                         --name student-backend \
-                        -e SECRET_KEY=$SECRET_KEY \
-                        shakthi14/student-backend:latest
+                        -e MONGO_URL="$MONGO_URL" \
+                        $BACKEND_IMAGE:$BUILD_NUMBER
                     '''
                 }
             }
         }
 
-
         stage('Build Frontend Image') {
             steps {
-                sh 'docker build -t $FRONTEND_IMAGE:latest frontend'
+                sh '''
+                  docker build -t $FRONTEND_IMAGE:$BUILD_NUMBER frontend
+                '''
             }
         }
 
         stage('Push Frontend Image') {
             steps {
                 withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
-                    sh 'docker push $FRONTEND_IMAGE:latest'
+                    sh 'docker push $FRONTEND_IMAGE:$BUILD_NUMBER'
                 }
             }
         }
@@ -76,9 +80,10 @@ pipeline {
                     -p 3000:80 \
                     --restart unless-stopped \
                     --name student-frontend \
-                    shakthi14/student-frontend:latest
+                    $FRONTEND_IMAGE:$BUILD_NUMBER
                 '''
             }
         }
     }
 }
+
