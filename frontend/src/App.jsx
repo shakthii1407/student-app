@@ -37,7 +37,7 @@ function Auth({ isSignup, setIsSignup, setToken }) {
       : { email, password };
 
     try {
-      const res = await fetch(`${API_URL}${endpoint}`, {
+      const res = await fetch(`${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
