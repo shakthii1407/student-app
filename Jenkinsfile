@@ -14,7 +14,7 @@ pipeline {
             }
         }
 
-        stage('Checkout Code') {
+        stage('Git Pull') {
             steps {
                 git branch: 'main',
                     credentialsId: 'github-creds',
@@ -24,9 +24,7 @@ pipeline {
 
         stage('Build Backend Image') {
             steps {
-                sh '''
-                  docker build -t $BACKEND_IMAGE:$BUILD_NUMBER backend
-                '''
+                sh 'docker build -t $BACKEND_IMAGE:$BUILD_NUMBER backend'
             }
         }
 
@@ -41,6 +39,7 @@ pipeline {
         stage('Deploy Backend') {
             steps {
                 withCredentials([
+                    string(credentialsId: 'backend-secret-key', variable: 'SECRET_KEY'),
                     string(credentialsId: 'mongo-url', variable: 'MONGO_URL')
                 ]) {
                     sh '''
@@ -49,7 +48,8 @@ pipeline {
                         -p 8000:8000 \
                         --restart unless-stopped \
                         --name student-backend \
-                        -e MONGO_URL="$MONGO_URL" \
+                        -e SECRET_KEY=$SECRET_KEY \
+                        -e MONGO_URL=$MONGO_URL \
                         $BACKEND_IMAGE:$BUILD_NUMBER
                     '''
                 }
@@ -58,9 +58,7 @@ pipeline {
 
         stage('Build Frontend Image') {
             steps {
-                sh '''
-                  docker build -t $FRONTEND_IMAGE:$BUILD_NUMBER frontend
-                '''
+                sh 'docker build -t $FRONTEND_IMAGE:$BUILD_NUMBER frontend'
             }
         }
 
@@ -85,5 +83,4 @@ pipeline {
             }
         }
     }
-}
-
+} 
