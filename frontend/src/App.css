@@ -15,7 +15,6 @@ body {
   width: 100vw;
 }
 
-/* ================= AUTH ================= */
 
 .auth-wrapper {
   min-height: 100vh;
@@ -28,7 +27,6 @@ body {
   width: 380px;
 }
 
-/* ================= COMMON ================= */
 
 .card {
   background: #020617;
@@ -81,7 +79,6 @@ button:hover {
   background: #020617;
 }
 
-/* ================= DASHBOARD ================= */
 
 .dashboard {
   padding: 25px;
@@ -95,7 +92,6 @@ button:hover {
   margin-bottom: 20px;
 }
 
-/* ✅ SMALL LOGOUT BUTTON (ONLY THIS BUTTON) */
 .header .secondary-btn {
   width: auto;
   padding: 6px 14px;
@@ -107,8 +103,6 @@ button:hover {
   width: 180px;
   margin-bottom: 20px;
 }
-
-/* ================= TABLE ================= */
 
 table {
   width: 100%;
